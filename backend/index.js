@@ -35,13 +35,13 @@ const httpServer = createServer(app);
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    
-    const isAllowed = 
+
+    const isAllowed =
       origin === process.env.FRONTEND_URL ||
       origin.startsWith("http://localhost:") ||
       origin.endsWith(".vercel.app") ||
       origin.includes("localhost");
-      
+
     if (isAllowed) {
       callback(null, true);
     } else {
@@ -180,15 +180,15 @@ app.get("/api/dashboardroute", AuthenticateUser, UserCtrl.dashboardRoute)
 app.get("/api/findusers", AuthenticateUser, AuthorizeUser(["admin"]), UserCtrl.FindAllUser)
 app.get("/api/findtechnicians", AuthenticateUser, AuthorizeUser(["admin", "user"]), UserCtrl.FindAllTechnician)
 app.delete("/api/deleteuser/:id", AuthenticateUser, AuthorizeUser(["admin"]), UserCtrl.DeleteUser)
-app.put("/api/updateuser/:id", AuthenticateUser, AuthorizeUser(["admin"]), UserCtrl.EditUser)
-app.put("/api/approve-technician/:id", AuthenticateUser, AuthorizeUser(["admin"]), UserCtrl.ApproveTechnician)
+app.put("/api/updateuser/:id", AuthenticateUser, AuthorizeUser(["admin","user"]), UserCtrl.EditUser)
+app.put("/api/approve-technician/:id", AuthenticateUser, UserCtrl.ApproveTechnician)
 app.get("/api/userinfo", AuthenticateUser, UserCtrl.GetuserInfo)
 app.put("/api/changepassword", AuthenticateUser, UserCtrl.ChangePassword)
 
 
 
 //all dashboard route
-app.get("/api/dashboardstats", AssetsCtrl.DashboardStats)  
+app.get("/api/dashboardstats", AssetsCtrl.DashboardStats)
 app.get("/api/userdashboardstats", AuthenticateUser, AssetsCtrl.UserStatsDashboard)
 app.get("/api/raiserequeststats", AuthenticateUser, RaiseRequestCtrl.getRaiserequestStats)
 app.get("/api/technicianstats", AuthenticateUser, RaiseRequestCtrl.getTechnicianStats)
@@ -247,7 +247,7 @@ app.get("/api/usergeneralrequest", AuthenticateUser, AuthorizeUser(["admin", "us
 app.delete("/api/generalraiserequest/:id", AuthenticateUser, AuthorizeUser(["admin", "user"]), GeneralRequestCtrl.DeleteGeneralRequest)
 
 app.post("/api/getnearbytechnician", AuthenticateUser, AuthorizeUser(["admin", "user"]), UserCtrl.getNearbyTechnicians)
-app.post("/api/admin/update-tech-coordinates", AuthenticateUser, AuthorizeUser(["admin","user"]), UserCtrl.updateTechCoordinates)
+app.post("/api/admin/update-tech-coordinates", AuthenticateUser, AuthorizeUser(["admin", "user"]), UserCtrl.updateTechCoordinates)
 
 
 
