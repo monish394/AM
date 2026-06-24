@@ -674,11 +674,10 @@ export default function UserHome() {
                           setSelectedRemoveAsset(ele);
                           setShowRemoveConfirm(true);
                         }}
-                        className="group relative inline-flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-600 hover:text-white hover:shadow-xl hover:shadow-rose-200 transition-all duration-300"
+                        className="group inline-flex items-center gap-2 px-4 py-2 bg-white text-rose-500 border border-rose-100 rounded-xl font-bold text-xs shadow-sm hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/30 hover:-translate-y-0.5 transition-all duration-300 active:scale-95"
                       >
-                        <FaTrashCan className="text-xs group-hover:scale-110 transition-transform duration-300" />
-                        <span className="hidden md:inline">Remove</span>
-                        <span className="md:hidden">Remove</span>
+                        <FaTrashCan className="text-[13px] group-hover:-rotate-12 transition-transform duration-300" />
+                        <span>Remove</span>
                       </button>
                     </td>
                   </tr>

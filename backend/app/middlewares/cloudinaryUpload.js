@@ -2,7 +2,7 @@ import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 import { Readable } from "stream";
 
-// Use memory storage — file stays in RAM, we pipe it to Cloudinary
+
 const storage = multer.memoryStorage();
 
 export const upload = multer({
@@ -18,12 +18,10 @@ export const upload = multer({
 });
 
 /**
- * Uploads a buffer to Cloudinary and returns the secure URL.
- * cloudinary.config() is called HERE (lazily) so that dotenv.config()
- * in index.js has already run and process.env values are available.
+
  *
- * @param {Buffer} buffer  - Image buffer from multer memoryStorage
- * @param {string} folder  - Cloudinary folder name
+ * @param {Buffer} buffer  
+ * @param {string} folder  
  */
 export const uploadToCloudinary = (buffer, folder = "asset-maintenance") => {
     // Configure Cloudinary at call-time, not at import-time

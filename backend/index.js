@@ -15,6 +15,7 @@ import UserCtrl from "./app/controllers/UsersControllers.js";
 import AssetsCtrl from "./app/controllers/AssetsControllers.js";
 import RaiseRequestCtrl from "./app/controllers/RaiseRequest.js";
 import { AuthenticateUser } from "./app/middlewares/AuthenticateUser.js";
+import { AuthorizeUser } from "./app/middlewares/AuthorizeUser.js";
 import NotificationCtrl from "./app/controllers/NotificationControllers.js";
 import PaymentCtrl from "./app/controllers/PaymentCtrl.js";
 import RequestCtrl from "./app/controllers/RequestAssetCtrl.js";
@@ -176,47 +177,47 @@ app.post("/api/usersregister", UserCtrl.Registeruser)
 app.post("/api/userslogin", UserCtrl.Loginuser)
 app.post("/api/google-login", UserCtrl.GoogleLogin)
 app.get("/api/dashboardroute", AuthenticateUser, UserCtrl.dashboardRoute)
-app.get("/api/findusers", UserCtrl.FindAllUser)
-app.get("/api/findtechnicians", UserCtrl.FindAllTechnician)
-app.delete("/api/deleteuser/:id", UserCtrl.DeleteUser)
-app.put("/api/updateuser/:id", UserCtrl.EditUser)
-app.put("/api/approve-technician/:id", AuthenticateUser, UserCtrl.ApproveTechnician)
+app.get("/api/findusers", AuthenticateUser, AuthorizeUser(["admin"]), UserCtrl.FindAllUser)
+app.get("/api/findtechnicians", AuthenticateUser, AuthorizeUser(["admin", "user"]), UserCtrl.FindAllTechnician)
+app.delete("/api/deleteuser/:id", AuthenticateUser, AuthorizeUser(["admin"]), UserCtrl.DeleteUser)
+app.put("/api/updateuser/:id", AuthenticateUser, AuthorizeUser(["admin"]), UserCtrl.EditUser)
+app.put("/api/approve-technician/:id", AuthenticateUser, AuthorizeUser(["admin"]), UserCtrl.ApproveTechnician)
 app.get("/api/userinfo", AuthenticateUser, UserCtrl.GetuserInfo)
 app.put("/api/changepassword", AuthenticateUser, UserCtrl.ChangePassword)
 
 
 
 //all dashboard route
-app.get("/api/dashboardstats", AssetsCtrl.DashboardStats)
+app.get("/api/dashboardstats", AssetsCtrl.DashboardStats)  
 app.get("/api/userdashboardstats", AuthenticateUser, AssetsCtrl.UserStatsDashboard)
-app.get("/api/raiserequeststats", RaiseRequestCtrl.getRaiserequestStats)
+app.get("/api/raiserequeststats", AuthenticateUser, RaiseRequestCtrl.getRaiserequestStats)
 app.get("/api/technicianstats", AuthenticateUser, RaiseRequestCtrl.getTechnicianStats)
 
 
 //assets route
 
-app.post("/api/assets/upload-image", upload.single("image"), AssetsCtrl.UploadAssetImage)
-app.post("/api/assets", AssetsCtrl.CreateAsset)
-app.get("/api/assets", AssetsCtrl.GetAsset)
-app.put("/api/assets/:assetid", AuthenticateUser, AssetsCtrl.Assignuser)
-app.get("/api/userassets", AuthenticateUser, AssetsCtrl.Userasset)
-app.put("/api/editassert/:assetid", AssetsCtrl.EditAllFieldAsset)
-app.put("/api/user/assign-asset/:assetid", AuthenticateUser, AssetsCtrl.AssignAssetToSelf)
-app.put("/api/user/unassign-asset/:assetid", AuthenticateUser, AssetsCtrl.UnassignAsset)
-app.delete("/api/assets/:assetid", AssetsCtrl.DeleteAsset)
+app.post("/api/assets/upload-image", AuthenticateUser, AuthorizeUser(["admin"]), upload.single("image"), AssetsCtrl.UploadAssetImage)
+app.post("/api/assets", AuthenticateUser, AuthorizeUser(["admin"]), AssetsCtrl.CreateAsset)
+app.get("/api/assets", AuthenticateUser, AuthorizeUser(["admin", "user", "technician"]), AssetsCtrl.GetAsset)
+app.put("/api/assets/:assetid", AuthenticateUser, AuthorizeUser(["admin"]), AssetsCtrl.Assignuser)
+app.get("/api/userassets", AuthenticateUser, AuthorizeUser(["admin", "user"]), AssetsCtrl.Userasset)
+app.put("/api/editassert/:assetid", AuthenticateUser, AuthorizeUser(["admin"]), AssetsCtrl.EditAllFieldAsset)
+app.put("/api/user/assign-asset/:assetid", AuthenticateUser, AuthorizeUser(["admin", "user"]), AssetsCtrl.AssignAssetToSelf)
+app.put("/api/user/unassign-asset/:assetid", AuthenticateUser, AuthorizeUser(["admin", "user"]), AssetsCtrl.UnassignAsset)
+app.delete("/api/assets/:assetid", AuthenticateUser, AuthorizeUser(["admin"]), AssetsCtrl.DeleteAsset)
 
 
 
 //raise request route
 
-app.post("/api/raiserequest", AuthenticateUser, RaiseRequestCtrl.Postissue)
-app.get("/api/userraiserequest", AuthenticateUser, RaiseRequestCtrl.Getuserissue)
-app.get("/api/allraiserequest", RaiseRequestCtrl.Getallrequest)
-app.put("/api/assigntechnician/:requestid", RaiseRequestCtrl.AssignTechnician)
-app.get("/api/alltechnicianrequest", AuthenticateUser, RaiseRequestCtrl.getTechnicianrequests)
-app.put("/api/raiserequest/accept/:requestid", AuthenticateUser, RaiseRequestCtrl.TechnicianAccept)
-app.put("/api/technicianstatusupdate/:requestid", RaiseRequestCtrl.TechnicianStatusUpdate)
-app.delete("/api/raiserequest/:requestid", AuthenticateUser, RaiseRequestCtrl.DeleteRequest)
+app.post("/api/raiserequest", AuthenticateUser, AuthorizeUser(["admin", "user"]), RaiseRequestCtrl.Postissue)
+app.get("/api/userraiserequest", AuthenticateUser, AuthorizeUser(["admin", "user"]), RaiseRequestCtrl.Getuserissue)
+app.get("/api/allraiserequest", AuthenticateUser, AuthorizeUser(["admin"]), RaiseRequestCtrl.Getallrequest)
+app.put("/api/assigntechnician/:requestid", AuthenticateUser, AuthorizeUser(["admin"]), RaiseRequestCtrl.AssignTechnician)
+app.get("/api/alltechnicianrequest", AuthenticateUser, AuthorizeUser(["admin", "technician"]), RaiseRequestCtrl.getTechnicianrequests)
+app.put("/api/raiserequest/accept/:requestid", AuthenticateUser, AuthorizeUser(["technician"]), RaiseRequestCtrl.TechnicianAccept)
+app.put("/api/technicianstatusupdate/:requestid", AuthenticateUser, AuthorizeUser(["admin", "technician"]), RaiseRequestCtrl.TechnicianStatusUpdate)
+app.delete("/api/raiserequest/:requestid", AuthenticateUser, AuthorizeUser(["admin", "user"]), RaiseRequestCtrl.DeleteRequest)
 
 
 
@@ -236,38 +237,38 @@ app.get("/api/payment/user", AuthenticateUser, PaymentCtrl.getUserPayments)
 
 //request for asset
 
-app.post("/api/requestasset", AuthenticateUser, RequestCtrl.CreateRequest)
-app.get("/api/getallrequestasset", RequestCtrl.GetAllRequests)
-app.put("/api/updaterequeststatus/:id", RequestCtrl.StausUpdate)
-app.get("/api/getusersrequest", AuthenticateUser, RequestCtrl.GetUsersRequest)
+app.post("/api/requestasset", AuthenticateUser, AuthorizeUser(["admin", "user"]), RequestCtrl.CreateRequest)
+app.get("/api/getallrequestasset", AuthenticateUser, AuthorizeUser(["admin"]), RequestCtrl.GetAllRequests)
+app.put("/api/updaterequeststatus/:id", AuthenticateUser, AuthorizeUser(["admin"]), RequestCtrl.StausUpdate)
+app.get("/api/getusersrequest", AuthenticateUser, AuthorizeUser(["admin", "user"]), RequestCtrl.GetUsersRequest)
 
-app.post("/api/generalraiserequest", AuthenticateUser, GeneralRequestCtrl.createGeneralrequest)
-app.get("/api/usergeneralrequest", AuthenticateUser, GeneralRequestCtrl.Getusergeneralrequest)
-app.delete("/api/generalraiserequest/:id", AuthenticateUser, GeneralRequestCtrl.DeleteGeneralRequest)
+app.post("/api/generalraiserequest", AuthenticateUser, AuthorizeUser(["admin", "user"]), GeneralRequestCtrl.createGeneralrequest)
+app.get("/api/usergeneralrequest", AuthenticateUser, AuthorizeUser(["admin", "user"]), GeneralRequestCtrl.Getusergeneralrequest)
+app.delete("/api/generalraiserequest/:id", AuthenticateUser, AuthorizeUser(["admin", "user"]), GeneralRequestCtrl.DeleteGeneralRequest)
 
-app.post("/api/getnearbytechnician", AuthenticateUser, UserCtrl.getNearbyTechnicians)
-app.post("/api/admin/update-tech-coordinates", AuthenticateUser, UserCtrl.updateTechCoordinates)
+app.post("/api/getnearbytechnician", AuthenticateUser, AuthorizeUser(["admin", "user"]), UserCtrl.getNearbyTechnicians)
+app.post("/api/admin/update-tech-coordinates", AuthenticateUser, AuthorizeUser(["admin","user"]), UserCtrl.updateTechCoordinates)
 
 
 
 
 //general request route
 
-app.get("/api/technician/general-requests", AuthenticateUser, GeneralRequestCtrl.getNearbyOpenRequests)
-app.post("/api/technician/general-request/:id/accept", AuthenticateUser, GeneralRequestCtrl.acceptGeneralRequest)
-app.get("/api/technician/general-request/assigned", AuthenticateUser, GeneralRequestCtrl.getAssignedRequests)
+app.get("/api/technician/general-requests", AuthenticateUser, AuthorizeUser(["technician"]), GeneralRequestCtrl.getNearbyOpenRequests)
+app.post("/api/technician/general-request/:id/accept", AuthenticateUser, AuthorizeUser(["technician"]), GeneralRequestCtrl.acceptGeneralRequest)
+app.get("/api/technician/general-request/assigned", AuthenticateUser, AuthorizeUser(["technician"]), GeneralRequestCtrl.getAssignedRequests)
 
-app.get("/api/gettechnicianaccepetedgeneralrequest", AuthenticateUser, GeneralRequestCtrl.getTechnicianAccecptedGeneralReqeust)
+app.get("/api/gettechnicianaccepetedgeneralrequest", AuthenticateUser, AuthorizeUser(["admin", "technician"]), GeneralRequestCtrl.getTechnicianAccecptedGeneralReqeust)
 
-app.get("/api/user/location", AuthenticateUser, UserCtrl.UserLocation)
-app.patch("/api/technician/general-request/:id/complete", AuthenticateUser, GeneralRequestCtrl.completeGeneralRequest)
-app.get("/api/getnearbyassetrequest", AuthenticateUser, RaiseRequestCtrl.getNearbyAssetRequests)
-app.get("/api/getallgeneralrequest", AuthenticateUser, GeneralRequestCtrl.getAllGeneralRequest)
+app.get("/api/user/location", AuthenticateUser, AuthorizeUser(["admin", "user", "technician"]), UserCtrl.UserLocation)
+app.patch("/api/technician/general-request/:id/complete", AuthenticateUser, AuthorizeUser(["technician"]), GeneralRequestCtrl.completeGeneralRequest)
+app.get("/api/getnearbyassetrequest", AuthenticateUser, AuthorizeUser(["admin", "technician"]), RaiseRequestCtrl.getNearbyAssetRequests)
+app.get("/api/getallgeneralrequest", AuthenticateUser, AuthorizeUser(["admin"]), GeneralRequestCtrl.getAllGeneralRequest)
 
-app.post("/api/generate-description", AuthenticateUser, AiCtrl.GenerateDescription)
+app.post("/api/generate-description", AuthenticateUser, AuthorizeUser(["admin", "user", "technician"]), AiCtrl.GenerateDescription)
 
 app.post("/api/enquiry", EnquiryCtrl.createEnquiry)
-app.get("/api/enquiries", EnquiryCtrl.getAllEnquiries)
+app.get("/api/enquiries", AuthenticateUser, AuthorizeUser(["admin"]), EnquiryCtrl.getAllEnquiries)
 
 
 

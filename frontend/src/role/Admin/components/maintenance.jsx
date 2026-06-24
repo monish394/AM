@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { fetchAllGeneralRequest } from "../../../slices/generalrequestslices";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import axios from "../../../config/api";
 
 const ROWS_PER_PAGE = 5;
 
@@ -68,9 +69,19 @@ export default function Maintenance() {
   const dispatch = useDispatch();
   const { allraiserequest } = AdminData();
   const GeneralRequest = useSelector((state) => state.GeneralRequest.data);
+  const [enquiries, setEnquiries] = useState([]);
 
   useEffect(() => {
     dispatch(fetchAllGeneralRequest());
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    axios
+      .get("/enquiries", { headers: { Authorization: token } })
+      .then((res) => setEnquiries(res.data))
+      .catch((err) => console.error("Failed to fetch enquiries:", err));
   }, []);
 
   const workingData = allraiserequest.filter(
@@ -84,6 +95,7 @@ export default function Maintenance() {
   const pgWorking = usePagination(workingData);
   const pgCompleted = usePagination(completedData);
   const pgGeneral = usePagination(GeneralRequest);
+  const pgEnquiries = usePagination(enquiries);
 
   return (
     <div className="p-4 md:p-8 space-y-8 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -359,6 +371,74 @@ export default function Maintenance() {
           </tbody>
         </table>
         <Pagination pg={pgGeneral} />
+      </div>
+
+      {/* Enquiries */}
+      <div className="overflow-x-auto rounded-3xl border border-slate-100 shadow-xl bg-white">
+        <div className="p-6 pb-0">
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Enquiries</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100">
+              {enquiries.length}
+            </span>
+          </div>
+        </div>
+        <table className="min-w-full divide-y divide-slate-100">
+          <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-bold tracking-[0.1em]">
+            <tr>
+              <th className="px-6 py-4 text-left">Name</th>
+              <th className="px-6 py-4 text-left">Email</th>
+              <th className="px-6 py-4 text-left">Message</th>
+              <th className="px-6 py-4 text-right">Received</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50">
+            {pgEnquiries.paged.length > 0 ? (
+              pgEnquiries.paged.map((enq) => (
+                <tr key={enq._id} className="hover:bg-slate-50/50 transition-colors group">
+                  <td className="px-6 py-5">
+                    <p className="text-xs font-bold text-slate-800">{enq.firstName}</p>
+                  </td>
+                  <td className="px-6 py-5">
+                    <a
+                      href={`mailto:${enq.email}`}
+                      className="text-xs text-indigo-600 font-medium hover:underline"
+                    >
+                      {enq.email}
+                    </a>
+                  </td>
+                  <td className="px-6 py-5">
+                    <p className="text-[11px] text-slate-500 leading-relaxed max-w-[350px]" title={enq.message}>
+                      {enq.message}
+                    </p>
+                  </td>
+                  <td className="px-6 py-5 text-right">
+                    <p className="text-[10px] text-slate-400 font-medium">
+                      {new Date(enq.createdAt).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                    <p className="text-[9px] text-slate-300">
+                      {new Date(enq.createdAt).toLocaleTimeString("en-IN", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="text-center px-4 py-10 text-slate-400 text-sm">
+                  No enquiries received yet
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        <Pagination pg={pgEnquiries} />
       </div>
     </div>
   );
